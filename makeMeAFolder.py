@@ -6,7 +6,7 @@ import subprocess
 import shutil
 from tkinter import messagebox
 
-# Functions
+# Functions     
 
 def browseFolder():
     path = filedialog.askdirectory()
@@ -15,9 +15,12 @@ def browseFolder():
         locationEntry.delete(0, tk.END)
         locationEntry.insert(0, path)
         locationEntry.config(state="readonly")
-        with open(fr"{localAppDataLocation}/makeMeAFolderInformationStoringFile.txt", "r") as f:
-            tempFolderVar, tempExeVar = f.read().splitlines()
-            tempFolderVar = "folderLocation=" + path + "\n" + tempExeVar
+        try:
+            with open(fr"{localAppDataLocation}/makeMeAFolderInformationStoringFile.txt", "r") as f:
+                tempFolderVar, tempExeVar = f.read().splitlines()
+                tempFolderVar = "folderLocation=" + path + "\n" + tempExeVar
+        except FileNotFoundError:
+            tempFolderVar = "folderLocation=" + path + "\n" + "codeExeLocation="
         with open(fr"{localAppDataLocation}/makeMeAFolderInformationStoringFile.txt", "w") as f:
             f.write(tempFolderVar)
 
@@ -144,37 +147,39 @@ def createProject():
                     
                     ## THIS IS WHEN AND IF THE PROGRAM CAN'T FIND CODE.EXE THEN IT'LL CHECK THE FILE AND IF THAT DOESN'T WORK THEN IT'LL ASK THE USER ON HOLD RIGHT NOW 
                     
-                    # try:
-                    #     with open(fr"{localAppDataLocation}/makeMeAFolderInformationStoringFile.txt", "r") as f:
-                    #                 tempFolderVar, tempExeVar = f.read().splitlines()
-                    #                 locationExe = tempFolderVar.split("=")[1]
-                    #                 subprocess.Popen([locationExe, folderPath])
-                    # except Exception as error:
-                    #     totalErrors = totalErrors + str(codeError)+ "\n"
-                    #     yesNo = messagebox.askyesno("VS Code", "VS Code could not be opened, would you like to select the path to code.exe?")
-                    #     if not yesNo:
-                    #         codeError = "The user has decided to not choose the path to code.exe"
-                    #         totalErrors = totalErrors + str(codeError)+ "\n" 
-                    #     else:
-                    #         while True:
-                    #             try:
-                    #                 pathExe = filedialog.askopenfile(
-                    #                     title="Mission: Locate code.exe",
-                    #                     filetypes=[("Executable files", "*.exe")]
-                    #                 )
-                    #                 if os.path.basename(pathExe).lower() == "code.exe":
-                    #                     with open(fr"{localAppDataLocation}/makeMeAFolderInformationStoringFile.txt", "r") as f:
-                    #                         tempFolderVar, tempExeVar = f.read().splitlines()
-                    #                         tempExeVar = tempFolderVar + "codeExeLocation=" + codePath + "\n" 
-                    #                     with open(fr"{localAppDataLocation}/makeMeAFolderInformationStoringFile.txt", "w") as f:
-                    #                         f.write(tempExeVar)
-                    #                     break
-                    #                 else:
-                    #                     locatorExeError = "The user has selected the wrong exe."
-                    #                     totalErrors = totalErrors + str(codeError)+ "\n"
-                    #             except Exception as error:
-                    #                 totalErrors = totalErrors + str(codeError)+ "\n"
-                    #                 break
+                    try:
+                        with open(fr"{localAppDataLocation}/makeMeAFolderInformationStoringFile.txt", "r") as f:
+                                    tempFolderVar, tempExeVar = f.read().splitlines()
+                                    locationExe = tempExeVar.split("=")[1]
+                                    subprocess.Popen([locationExe, folderPath])
+                    except Exception as error:
+                        totalErrors = totalErrors + str(codeError)+ "\n"
+                        yesNo = messagebox.askyesno("VS Code", "VS Code could not be opened, would you like to select the path to code.cmd?")
+                        if not yesNo:
+                            codeError = "The user has decided to not choose the path to code.exe"
+                            totalErrors = totalErrors + str(codeError)+ "\n" 
+                        else:
+                            while True:
+                                try:
+                                    pathExe = filedialog.askopenfilename(
+                                        title="Mission: Locate code.exe",
+                                        filetypes=[("Executable files", "*.exe")]
+                                    )
+                                    if os.path.basename(pathExe).lower() == "code.exe" or os.path.basename(pathExe).lower() == "code.cmd":
+                                        with open(fr"{localAppDataLocation}/makeMeAFolderInformationStoringFile.txt", "r") as f:
+                                            tempFolderVar, tempExeVar = f.read().splitlines()
+                                            tempExeVar = tempFolderVar + "\n" + "codeExeLocation=" + pathExe  
+                                        with open(fr"{localAppDataLocation}/makeMeAFolderInformationStoringFile.txt", "w") as f:
+                                            f.write(tempExeVar)
+                                        break
+                                    elif not pathExe:
+                                        break 
+                                    else:
+                                        locatorExeError = "The user has selected the wrong exe."
+                                        totalErrors = totalErrors + str(codeError)+ "\n"    
+                                except Exception as error:
+                                    totalErrors = totalErrors + str(codeError)+ "\n"
+                                    break
 def checkLog():
     mainFrame.pack_forget()
     logFrame.pack(fill="both", expand=True)
@@ -343,3 +348,4 @@ mainbutton.grid(row=4, column=1)
 # Ender/ Last lines of code
 
 root.mainloop()
+
